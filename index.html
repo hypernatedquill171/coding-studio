@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Coding Studio</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #1e1e1e;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* TOP */
+        .top {
+            height: 40px;
+            background: #181818;
+            display: flex;
+            align-items: center;
+            padding-left: 15px;
+        }
+
+        .title {
+            font-weight: bold;
+            margin-right: 30px;
+        }
+
+        .subtitle {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        /* TABS */
+        .tabs {
+            height: 40px;
+            background: #252526;
+            display: flex;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            color: #aaa;
+            border-right: 1px solid #333;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .tab.active {
+            color: white;
+            background: #1e1e1e;
+            border-top: 2px solid #007acc;
+        }
+
+        /* MAIN */
+        .main {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+
+        /* EDITOR */
+        .editor {
+            width: 54%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .code-area {
+            flex: 1;
+            display: flex;
+        }
+
+        .numbers {
+            width: 55px;
+            padding-top: 15px;
+            padding-right: 15px;
+            text-align: right;
+            color: #777;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        textarea {
+            flex: 1;
+            border: none;
+            outline: none;
+            resize: none;
+
+            background: #1e1e1e;
+            color: #d4d4d4;
+
+            font-family: Consolas, monospace;
+            font-size: 14px;
+
+            padding: 15px 10px;
+
+            line-height: 22px;
+        }
+
+        /* PREVIEW */
+        .preview {
+            width: 46%;
+            background: white;
+            border-left: 1px solid #333;
+        }
+
+        .preview-title {
+            height: 40px;
+            background: #252526;
+            color: white;
+            padding: 12px 15px;
+            font-size: 13px;
+        }
+
+        iframe {
+            width: 100%;
+            height: calc(100% - 40px);
+            border: none;
+            background: white;
+        }
+
+        /* BOTTOM */
+        .bottom {
+            height: 45px;
+            background: #181818;
+            border-top: 1px solid #333;
+            display: flex;
+            align-items: center;
+            padding: 5px 15px;
+        }
+
+        button {
+            border: none;
+            padding: 8px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 8px;
+            font-size: 13px;
+        }
+
+        .run {
+            background: #0e8a3e;
+            color: white;
+        }
+
+        .run:hover {
+            background: #0b6f32;
+        }
+
+        .clear {
+            background: #444;
+            color: white;
+        }
+
+        .clear:hover {
+            background: #555;
+        }
+
+        .status {
+            margin-left: auto;
+            color: #888;
+            font-size: 12px;
+        }
+
+        @media (max-width: 700px) {
+            .editor {
+                width: 50%;
+            }
+
+            .preview {
+                width: 50%;
+            }
+
+            .tab {
+                padding: 12px 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOP -->
+    <div class="top">
+        <div class="title">Coding Studio</div>
+        <div class="subtitle">Student Code Editor</div>
+    </div>
+
+
+    <!-- TABS -->
+    <div class="tabs">
+
+        <div class="tab active" onclick="openTab('html')">
+            index.html
+        </div>
+
+        <div class="tab" onclick="openTab('css')">
+            style.css
+        </div>
+
+        <div class="tab" onclick="openTab('js')">
+            script.js
+        </div>
+
+    </div>
+
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- EDITOR -->
+        <div class="editor">
+
+            <div class="code-area">
+
+                <div class="numbers" id="numbers">
+                    1
+                </div>
+
+                <textarea
+                    id="code"
+                    spellcheck="false"
+                    placeholder="Start writing your code here..."
+                ></textarea>
+
+            </div>
+
+
+            <!-- BUTTONS -->
+            <div class="bottom">
+
+                <button class="run" onclick="runCode()">
+                    ▶ Run
+                </button>
+
+                <button class="clear" onclick="clearCode()">
+                    Clear
+                </button>
+
+                <div class="status" id="status">
+                    Ready
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PREVIEW -->
+        <div class="preview">
+
+            <div class="preview-title">
+                Preview
+            </div>
+
+            <iframe id="output"></iframe>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        let htmlCode = "";
+        let cssCode = "";
+        let jsCode = "";
+
+        let currentTab = "html";
+
+
+        // CHANGE TAB
+        function openTab(tab) {
+
+            saveCode();
+
+            currentTab = tab;
+
+            if (tab === "html") {
+                document.getElementById("code").value = htmlCode;
+            }
+
+            if (tab === "css") {
+                document.getElementById("code").value = cssCode;
+            }
+
+            if (tab === "js") {
+                document.getElementById("code").value = jsCode;
+            }
+
+            document.querySelectorAll(".tab").forEach(function(item) {
+                item.classList.remove("active");
+            });
+
+            event.target.classList.add("active");
+
+            updateNumbers();
+        }
+
+
+        // SAVE CODE
+        function saveCode() {
+
+            if (currentTab === "html") {
+                htmlCode = document.getElementById("code").value;
+            }
+
+            if (currentTab === "css") {
+                cssCode = document.getElementById("code").value;
+            }
+
+            if (currentTab === "js") {
+                jsCode = document.getElementById("code").value;
+            }
+        }
+
+
+        // RUN
+        function runCode() {
+
+            saveCode();
+
+            let result = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        ${cssCode}
+                    </style>
+                </head>
+
+                <body>
+
+                    ${htmlCode}
+
+                    <script>
+                        ${jsCode}
+                    <\/script>
+
+                </body>
+                </html>
+            `;
+
+            document.getElementById("output").srcdoc = result;
+
+            document.getElementById("status").innerText = "Running";
+        }
+
+
+        // CLEAR
+        function clearCode() {
+
+            htmlCode = "";
+            cssCode = "";
+            jsCode = "";
+
+            document.getElementById("code").value = "";
+
+            document.getElementById("output").srcdoc = "";
+
+            document.getElementById("status").innerText = "Ready";
+
+            updateNumbers();
+        }
+
+
+        // LINE NUMBERS
+        function updateNumbers() {
+
+            let lines =
+                document.getElementById("code").value.split("\n").length;
+
+            let numbers = "";
+
+            for (let i = 1; i <= lines; i++) {
+                numbers += i + "<br>";
+            }
+
+            document.getElementById("numbers").innerHTML = numbers;
+        }
+
+
+        // UPDATE WHILE TYPING
+        document.getElementById("code").addEventListener(
+            "input",
+            updateNumbers
+        );
+
+    </script>
+
+</body>
+</html>
